@@ -18,7 +18,49 @@ keys = os.environ.keys()
 keys.sort()
 for k in keys:
     print "%s\t%s" % (escape(k), escape(os.environ[k]))
+
+# Extract the information we need from the os.environ() key value pairs.
+# The fields passed in from Netcool (Node, Summary, etc., are in 
+# the QUERY_STRING, which looks like this:
+# QUERY_STRING	datasource=OMNIBUS&$selected_rows.NodeAlias=foo-demo&$selected_rows.AlertKey=CSI_ISMBadWebSiteFatal&$selected_rows.application=NC&$selected_rows.Severity=5&$selected_rows.ITMDisplayItem=nc:foo-demo/Unity&CONVERSION.$selected_rows.Severity=Critical&$selected_rows.Summary=nc:foo-demo/Unity&$selected_rows.Node=foo-demo
+
 user = os.environ['WEBTOP_USER']
+
+alert_string = os.environ['QUERY_STRING'];
+
+# Given 'A - 13, B - 14, C - 29, M - 99'
+# split the string into "<key> = <value>" parts: s.split('&')
+# split each part into "<key> ", " <value>" pairs: item.split('-')
+# remove the whitespace from each pair: (k.strip(), v.strip())
+
+alert_kvpairs = dict((k.strip(), v.strip()) for k,v in 
+              (item.split('=') for item in alert_string.split('&')))
+
+for k in alert_kvpairs:
+    print "%s\t%s" % (escape(k), escape(alert_kvpairs[k]))
+
+# This gives me these keys:
+#    Key				Description
+# $selected_rows.AlertKey		AlertKey
+# $selected_rows.NodeAlias		IP Address
+# $selected_rows.Summary		Summary
+# $selected_rows.ITMDisplayItem		Alternate Summary
+# $selected_rows.application		Ops group (lookup for slack channel
+# CONVERSION.$selected_rows.Severity	Severity String
+# $selected_rows.Node			Hostname
+
+summary        = alert_kvpairs['$selected_rows.Summary']
+summary        = summary + " " + alert_kvpairs['$selected_rows.ITMDisplayItem']
+itmdisplayitem = alert_kvpairs['$selected_rows.ITMDisplayItem']
+node           = alert_kvpairs['$selected_rows.Node']
+alertkey       = alert_kvpairs['$selected_rows.AlertKey']
+nodealias      = alert_kvpairs['$selected_rows.NodeAlias']
+severity       = alert_kvpairs['CONVERSION.$selected_rows.Severity']
+
+if alert_kvpairs['CONVERSION.$selected_rows.Severity'] == 'Critical':
+	color = 'danger'
+else:
+	color = 'warning'
 
 slack_data = {
     "channel": "foo",
@@ -26,34 +68,34 @@ slack_data = {
     "text": "Sent by SRE %s" % user,
     "attachments": [
         {
-            "fallback": "Summary: The router is on fire, Node: sifr40eoisfoo.very.long.domainname, AlertKey: CSI_ISMBadWebSiteFatal, NodeAlias: 127.0.0.2, Severity: Critical.",
+            "fallback": "Summary: %s %s, Node: %s, AlertKey: %s, NodeAlias: %s, Severity: Critical." % (summary, itmdisplayitem, node, alertkey, nodealias),
             "title_link": "https://blue-hybrid.slack.com/messages/C60S7QPDW",
             "title": "Alert from SRE team",
-            "color": "danger",
+            "color": "%s" % color,
             "fields": [
                 {
                     "short": "false",
-                    "value": "The router is on fire",
+                    "value": "%s" % summary,
                     "title": "Summary"
                 },
                 {
                     "short": "false",
-                    "value": "sifr40eoisfoo.very.long.domainname",
+                    "value": "%s" % node,
                     "title": "Node"
                 },
                 {
                     "short": "false",
-                    "value": "CSI_ISMBadWebSiteFatal",
+                    "value": "%s" % alertkey,
                     "title": "AlertKey"
                 },
                 {
                     "short": "true",
-                    "value": "127.0.0.2",
+                    "value": "%s" % nodealias,
                     "title": "NodeAlias"
                 },
                 {
                     "short": "true",
-                    "value": "Critical",
+                    "value": "%s" % severity,
                     "title": "Severity"
                 }
             ]
