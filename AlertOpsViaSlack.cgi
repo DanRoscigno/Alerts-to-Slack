@@ -1,4 +1,11 @@
 #!/opt/IBM/netcool/python27/bin/python
+# to do:
+# 1) switch on $selected_rows.application to set slack channel and webhook
+# 2) modify webhhoktoken.py to include token for each Ops team
+# 3) make HTML compliant
+# 4) add in a form to allow extra test to be added
+# 5) allow journals to be sent
+
 print "Content-type: text/html"
 print
 print "<pre>"
