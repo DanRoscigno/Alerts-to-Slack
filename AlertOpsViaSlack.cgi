@@ -8,15 +8,16 @@ import requests
 
 """
 Put your webhook url that looks like:
-   https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX'
-and the slack channel name for each ops team in a file named webhooktoken.ini in this format:
+   https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXX'
+and the slack channel name for each ops team in a file named
+webhooktoken.ini in this format:
 
 [APPNAME1]
-token: https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX
+token: https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXX
 channel: app1-ops-events
 
 [APPNAME2]
-token: https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX
+token: https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXX
 channel: app2-ops-events
 """
 
@@ -93,7 +94,7 @@ if alert_kvpairs['CONVERSION.$selected_rows.Severity'] == 'Critical':
 else:
 	color = 'warning'
 # Up top we defined ConfigSectionMap, now we will lookup the channel and token
-channel = ConfigSectionMap(application)['channel']
+channel = Config.get(application, 'channel')
 token = ConfigSectionMap(application)['token']
 
 slack_data = {
