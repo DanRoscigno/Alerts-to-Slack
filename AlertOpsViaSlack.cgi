@@ -25,18 +25,6 @@ import ConfigParser
 Config = ConfigParser.ConfigParser()
 Config.read("/opt/IBM/netcool/gui/omnibus_webgui/etc/cgi-bin/webhooktoken.ini")
 
-def ConfigSectionMap(section):
-    dict1 = {}
-    options = Config.options(section)
-    for option in options:
-        try:
-            dict1[option] = Config.get(section, option)
-            if dict1[option] == -1:
-                DebugPrint("skip: %s" % option)
-        except:
-            print("exception on %s!" % option)
-            dict1[option] = None
-    return dict1
 
 
 
@@ -93,9 +81,9 @@ if alert_kvpairs['CONVERSION.$selected_rows.Severity'] == 'Critical':
 	color = 'danger'
 else:
 	color = 'warning'
-# Up top we defined ConfigSectionMap, now we will lookup the channel and token
+# Up top we read the config, now we will lookup the channel and token
 channel = Config.get(application, 'channel')
-token = ConfigSectionMap(application)['token']
+token   = Config.get(application, 'token')
 
 slack_data = {
     "channel": "%s" % channel,
