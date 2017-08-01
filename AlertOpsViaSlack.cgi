@@ -1,22 +1,37 @@
 #!/opt/IBM/netcool/python27/bin/python
-# to do:
-# 1) switch on $selected_rows.application to set slack channel and webhook
-# 2) modify webhhoktoken.py to include token for each Ops team
-# 3) make HTML compliant
-# 4) add in a form to allow extra test to be added
-# 5) allow journals to be sent
-
 print "Content-type: text/html"
 print
 print "<pre>"
 
 import json
 import requests
-# put your webhook url that looks like:
-#   https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX'
-# in a file named webhooktoken.py and then it will be read in using the next two lines:
-import webhooktoken
-webhook_url = webhooktoken.token
+
+"""
+Put your webhook url that looks like:
+   https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX'
+and the slack channel name for each ops team in a file named webhooktoken.ini in this format:
+
+"""
+
+import ConfigParser
+Config = ConfigParser.ConfigParser()
+Config.read("/opt/IBM/netcool/gui/omnibus_webgui/etc/cgi-bin/webhooktoken.ini")
+print Config.sections()
+
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
+
+
 
 import os, sys
 from cgi import escape
@@ -63,14 +78,19 @@ node           = alert_kvpairs['$selected_rows.Node']
 alertkey       = alert_kvpairs['$selected_rows.AlertKey']
 nodealias      = alert_kvpairs['$selected_rows.NodeAlias']
 severity       = alert_kvpairs['CONVERSION.$selected_rows.Severity']
+application    = alert_kvpairs['$selected_rows.application']
 
 if alert_kvpairs['CONVERSION.$selected_rows.Severity'] == 'Critical':
 	color = 'danger'
 else:
 	color = 'warning'
+# Up top we defined ConfigSectionMap, now we will lookup the channel and token
+channel = ConfigSectionMap(application)['channel']
+token = ConfigSectionMap(application)['token']
+print "sending a message to %s slack channel using the webhook URL %s." % (channel, token)
 
 slack_data = {
-    "channel": "foo",
+    "channel": "%s" % channel,
     # This next line subs the var user in for the SRE's name, and we got that name from os.environ['WEBTOP_USER']
     "text": "Sent by SRE %s" % user,
     "attachments": [
@@ -111,7 +131,7 @@ slack_data = {
 }
 
 slackResponse = requests.post(
-    webhook_url, data=json.dumps(slack_data),
+    token, data=json.dumps(slack_data),
     headers={'Content-Type': 'application/json'}
 )
 
