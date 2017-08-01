@@ -11,6 +11,13 @@ Put your webhook url that looks like:
    https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX'
 and the slack channel name for each ops team in a file named webhooktoken.ini in this format:
 
+[APPNAME1]
+token: https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX
+channel: app1-ops-events
+
+[APPNAME2]
+token: https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX
+channel: app2-ops-events
 """
 
 import ConfigParser
