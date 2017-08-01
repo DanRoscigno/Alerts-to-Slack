@@ -16,7 +16,6 @@ and the slack channel name for each ops team in a file named webhooktoken.ini in
 import ConfigParser
 Config = ConfigParser.ConfigParser()
 Config.read("/opt/IBM/netcool/gui/omnibus_webgui/etc/cgi-bin/webhooktoken.ini")
-print Config.sections()
 
 def ConfigSectionMap(section):
     dict1 = {}
@@ -35,17 +34,20 @@ def ConfigSectionMap(section):
 
 import os, sys
 from cgi import escape
-print "<strong>Python %s</strong>" % sys.version
+
 keys = os.environ.keys()
-keys.sort()
-for k in keys:
-    print "%s\t%s" % (escape(k), escape(os.environ[k]))
 
-# Extract the information we need from the os.environ() key value pairs.
-# The fields passed in from Netcool (Node, Summary, etc., are in 
-# the QUERY_STRING, which looks like this:
-# QUERY_STRING	datasource=OMNIBUS&$selected_rows.NodeAlias=foo-demo&$selected_rows.AlertKey=CSI_ISMBadWebSiteFatal&$selected_rows.application=NC&$selected_rows.Severity=5&$selected_rows.ITMDisplayItem=nc:foo-demo/Unity&CONVERSION.$selected_rows.Severity=Critical&$selected_rows.Summary=nc:foo-demo/Unity&$selected_rows.Node=foo-demo
-
+"""
+Extract the information we need from the os.environ() key value pairs.
+The fields passed in from Netcool (Node, Summary, etc., are in
+the QUERY_STRING, which looks like this:
+QUERY_STRING	datasource=OMNIBUS&$selected_rows.NodeAlias=foo-demo&\
+$selected_rows.AlertKey=CSI_ISMBadWebSiteFatal&\
+$selected_rows.application=NC&$selected_rows.Severity=5&\
+$selected_rows.ITMDisplayItem=nc:foo-demo/Unity&\
+CONVERSION.$selected_rows.Severity=Critical&\
+$selected_rows.Summary=nc:foo-demo/Unity&$selected_rows.Node=foo-demo
+"""
 user = os.environ['WEBTOP_USER']
 
 alert_string = os.environ['QUERY_STRING'];
@@ -55,21 +57,20 @@ alert_string = os.environ['QUERY_STRING'];
 # split each part into "<key> ", " <value>" pairs: item.split('-')
 # remove the whitespace from each pair: (k.strip(), v.strip())
 
-alert_kvpairs = dict((k.strip(), v.strip()) for k,v in 
+alert_kvpairs = dict((k.strip(), v.strip()) for k,v in
               (item.split('=') for item in alert_string.split('&')))
 
-for k in alert_kvpairs:
-    print "%s\t%s" % (escape(k), escape(alert_kvpairs[k]))
-
-# This gives me these keys:
-#    Key				Description
-# $selected_rows.AlertKey		AlertKey
-# $selected_rows.NodeAlias		IP Address
-# $selected_rows.Summary		Summary
-# $selected_rows.ITMDisplayItem		Alternate Summary
-# $selected_rows.application		Ops group (lookup for slack channel
-# CONVERSION.$selected_rows.Severity	Severity String
-# $selected_rows.Node			Hostname
+"""
+This gives me these keys:
+    Key				Description
+ $selected_rows.AlertKey             AlertKey
+ $selected_rows.NodeAlias		         IP Address
+ $selected_rows.Summary	             Summary
+ $selected_rows.ITMDisplayItem	     Alternate Summary
+ $selected_rows.application		       Ops group (lookup for slack channel
+ CONVERSION.$selected_rows.Severity  Severity String
+ $selected_rows.Node	               Hostname
+"""
 
 summary        = alert_kvpairs['$selected_rows.Summary']
 summary        = summary + " " + alert_kvpairs['$selected_rows.ITMDisplayItem']
@@ -87,7 +88,6 @@ else:
 # Up top we defined ConfigSectionMap, now we will lookup the channel and token
 channel = ConfigSectionMap(application)['channel']
 token = ConfigSectionMap(application)['token']
-print "sending a message to %s slack channel using the webhook URL %s." % (channel, token)
 
 slack_data = {
     "channel": "%s" % channel,
@@ -141,9 +141,7 @@ if slackResponse.status_code != 200:
         % (slackResponse.status_code, slackResponse.text)
     )
 
-for k in keys:
-    print "%s\t%s" % (escape(k), escape(os.environ[k]))
 
-print json.dumps(slack_data, sort_keys=False, indent=4, separators=(',', ': '))
+#print json.dumps(slack_data, sort_keys=False, indent=4, separators=(',', ': '))
 
 print "</pre>"
