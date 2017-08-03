@@ -72,16 +72,16 @@ lastoccurrence = time.strftime('%Y-%m-%d %H:%M', time.gmtime(float(alert_kvpairs
 print '<form method="post" action="Process.cgi">'
 
 print '<fieldset>'
-print '<input type="radio" name="notification_type" value="nonurgent">   Non-urgent notification <br>'
-print '<input type="radio" name="notification_type" value="tech_bridge"> Tech Bridge             <br>'
-print '<input type="radio" name="notification_type" value="swat_open">   SWAT Open               <br>'
-print '<input type="radio" name="notification_type" value="swat_close">  SWAT Close              '
+print '<input type="radio" name="notification_type" value="nonurgent" required>   Non-urgent notification <br>'
+print '<input type="radio" name="notification_type" value="tech_bridge" required> Tech Bridge             <br>'
+print '<input type="radio" name="notification_type" value="swat_open" required>   SWAT Open               <br>'
+print '<input type="radio" name="notification_type" value="swat_close" required>  SWAT Close              '
 print '</fieldset>'
 print '<br>'
 
 print '<fieldset>'
 print '<legend>Text you want sent along with event content (why are you sending this to slack?)</legend>'
-print '<input type="text" name="SRE_text" size="100">'
+print '<input type="text" name="SRE_text" size="100" required>'
 print '</fieldset>'
 print '<br>'
 
