@@ -58,8 +58,9 @@ This gives me these keys:
 """
 
 summary        = alert_kvpairs['$selected_rows.Summary']
-summary        = summary + " " + alert_kvpairs['$selected_rows.ITMDisplayItem']
 itmdisplayitem = alert_kvpairs['$selected_rows.ITMDisplayItem']
+if len(summary) == 0:
+    summary = itmdisplayitem
 node           = alert_kvpairs['$selected_rows.Node']
 alertkey       = alert_kvpairs['$selected_rows.AlertKey']
 nodealias      = alert_kvpairs['$selected_rows.NodeAlias']
@@ -69,7 +70,7 @@ application    = alert_kvpairs['$selected_rows.application']
 lastoccurrence = time.strftime('%Y-%m-%d %H:%M', time.gmtime(float(alert_kvpairs['$selected_rows.LastOccurrence'])))
 
 
-print '<form method="post" action="Process.cgi">'
+print '<form method="post" action="AlertOpsViaSlack.cgi">'
 
 print '<fieldset>'
 print '<input type="radio" name="notification_type" value="nonurgent" required>   Non-urgent notification <br>'
@@ -117,6 +118,12 @@ print '<br>'
 print '<fieldset>'
 print '<legend>Last Occurrence (in GMT)</legend>'
 print '<input type="text" name="alert_lastoccurrence" size="100" value="%s">' % lastoccurrence
+print '</fieldset>'
+print '<br>'
+
+print '<fieldset>'
+print '<legend>Severity</legend>'
+print '<input type="text" name="alert_severity" size="100" value="%s">' % severity
 print '</fieldset>'
 print '<br>'
 

@@ -25,59 +25,39 @@ import ConfigParser
 Config = ConfigParser.ConfigParser()
 Config.read("/opt/IBM/netcool/gui/omnibus_webgui/etc/cgi-bin/webhooktoken.ini")
 
-
-
-
 import os, sys
 from cgi import escape
 
 keys = os.environ.keys()
 
-"""
-Extract the information we need from the os.environ() key value pairs.
-The fields passed in from Netcool (Node, Summary, etc., are in
-the QUERY_STRING, which looks like this:
-QUERY_STRING	datasource=OMNIBUS&$selected_rows.NodeAlias=foo-demo&\
-$selected_rows.AlertKey=CSI_ISMBadWebSiteFatal&\
-$selected_rows.application=NC&$selected_rows.Severity=5&\
-$selected_rows.ITMDisplayItem=nc:foo-demo/Unity&\
-CONVERSION.$selected_rows.Severity=Critical&\
-$selected_rows.Summary=nc:foo-demo/Unity&$selected_rows.Node=foo-demo
-"""
-user = os.environ['WEBTOP_USER']
-
-alert_string = os.environ['QUERY_STRING'];
-
-# Given 'A - 13, B - 14, C - 29, M - 99'
-# split the string into "<key> = <value>" parts: s.split('&')
-# split each part into "<key> ", " <value>" pairs: item.split('-')
-# remove the whitespace from each pair: (k.strip(), v.strip())
-
-alert_kvpairs = dict((k.strip(), v.strip()) for k,v in
-              (item.split('=') for item in alert_string.split('&')))
+import urlparse
+alert_info = {}
+alert_info = dict(urlparse.parse_qsl(os.environ['QUERY_STRING']))
 
 """
 This gives me these keys:
-    Key				Description
- $selected_rows.AlertKey             AlertKey
- $selected_rows.NodeAlias		         IP Address
- $selected_rows.Summary	             Summary
- $selected_rows.ITMDisplayItem	     Alternate Summary
- $selected_rows.application		       Ops group (lookup for slack channel
- CONVERSION.$selected_rows.Severity  Severity String
- $selected_rows.Node	               Hostname
+    Key				          Description
+  SRE_text    		      Freeform text typed in the Slack form
+  alert_alertkey		    AlertKey
+  alert_application		  Ops group (lookup for slack channel)
+  alert_lastoccurrence  Most recent time (GMT) this occurred
+  alert_node            Hostname
+  alert_nodealias       Alternate (hopefully IP) Hostname
+  alert_summary         Summary or ITMDisplayItem from netcool
+  notification_type     Type of Slack request
+  WEBTOP_USER           Username in Netcool
 """
 
-summary        = alert_kvpairs['$selected_rows.Summary']
-summary        = summary + " " + alert_kvpairs['$selected_rows.ITMDisplayItem']
-itmdisplayitem = alert_kvpairs['$selected_rows.ITMDisplayItem']
-node           = alert_kvpairs['$selected_rows.Node']
-alertkey       = alert_kvpairs['$selected_rows.AlertKey']
-nodealias      = alert_kvpairs['$selected_rows.NodeAlias']
-severity       = alert_kvpairs['CONVERSION.$selected_rows.Severity']
-application    = alert_kvpairs['$selected_rows.application']
+sre_text       = alert_info['SRE_text']
+summary        = alert_info['alert_summary']
+node           = alert_info['alert_node']
+alertkey       = alert_info['alert_alertkey']
+nodealias      = alert_info['alert_nodealias']
+severity       = alert_info['alert_severity']
+application    = alert_info['alert_application']
+user           = os.environ['WEBTOP_USER']
 
-if alert_kvpairs['CONVERSION.$selected_rows.Severity'] == 'Critical':
+if severity == 'Critical':
 	color = 'danger'
 else:
 	color = 'warning'
@@ -91,11 +71,16 @@ slack_data = {
     "text": "Sent by SRE %s" % user,
     "attachments": [
         {
-            "fallback": "Summary: %s %s, Node: %s, AlertKey: %s, NodeAlias: %s, Severity: Critical." % (summary, itmdisplayitem, node, alertkey, nodealias),
+            "fallback": "Summary: %s, Node: %s, AlertKey: %s, NodeAlias: %s, Severity: Critical." % (summary, node, alertkey, nodealias),
             "title_link": "https://blue-hybrid.slack.com/messages/C60S7QPDW",
             "title": "Alert from SRE team",
             "color": "%s" % color,
             "fields": [
+                {
+                    "short": "false",
+                    "value": "%s" % sre_text,
+                    "title": "Note"
+                },
                 {
                     "short": "false",
                     "value": "%s" % summary,
