@@ -120,12 +120,6 @@ print '<input type="text" name="alert_lastoccurrence" size="100" value="%s">' % 
 print '</fieldset>'
 print '<br>'
 
-
-print """
-  <input type="submit" value="Send to Slack">
-    <INPUT TYPE="hidden" NAME  = "oldquerystring"
-"""
-print "                     VALUE = \"%s\" >" % os.environ['QUERY_STRING']
 print """
   </form>
   <pre>
