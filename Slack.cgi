@@ -18,6 +18,10 @@ All of the fields except for the <i>text that you want sent along</i>
 should be pre-populated.  You can change all of the data other than
 the Application.<br><br>
 
+NOTE: If an event has a non-standard application name, the tool will
+fail.  Please let me know if the tool fails and I will try to find out
+why the application is not set correcty.
+
 Plese select the type of Slack message you would like to send, type in
 your text, and push the <i>Send to Slack</i> button.<br><br>
 """
