@@ -1,4 +1,6 @@
 #!/opt/IBM/netcool/python27/bin/python
+import cgitb
+cgitb.enable()
 print "Content-type: text/html"
 print
 
