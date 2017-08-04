@@ -1,7 +1,6 @@
 #!/opt/IBM/netcool/python27/bin/python
 print "Content-type: text/html"
 print
-print "<pre>"
 
 import json
 import requests
@@ -121,8 +120,8 @@ if slackResponse.status_code != 200:
         'There was an error (%s) during posting the message to slack, the response is:\n%s'
         % (slackResponse.status_code, slackResponse.text)
     )
+  else:
+    print "Successfully posted to %s" % channel
 
 
 #print json.dumps(slack_data, sort_keys=False, indent=4, separators=(',', ': '))
-
-print "</pre>"
