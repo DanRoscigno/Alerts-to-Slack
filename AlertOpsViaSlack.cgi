@@ -2,6 +2,18 @@
 print "Content-type: text/html"
 print
 
+print """
+<html>
+
+<head><title>Netcool to Slack</title></head>
+
+<body>
+
+  <h3> Netcool to Slack </h3>
+<br><br>
+  <pre>
+"""
+
 import json
 import requests
 
@@ -123,5 +135,13 @@ if slackResponse.status_code != 200:
 else:
     print "Successfully posted to %s" % channel
 
+print """
+
+
+  </pre>
+</body>
+
+</html>
+"""
 
 #print json.dumps(slack_data, sort_keys=False, indent=4, separators=(',', ': '))
