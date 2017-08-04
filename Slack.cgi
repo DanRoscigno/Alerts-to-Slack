@@ -20,7 +20,7 @@ the Application.<br><br>
 
 NOTE: If an event has a non-standard application name, the tool will
 fail.  Please let me know if the tool fails and I will try to find out
-why the application is not set correcty.
+why the application is not set correcty.<br><br>
 
 Plese select the type of Slack message you would like to send, type in
 your text, and push the <i>Send to Slack</i> button.<br><br>
