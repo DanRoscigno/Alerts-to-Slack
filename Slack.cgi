@@ -61,6 +61,7 @@ summary        = alert_kvpairs['$selected_rows.Summary']
 itmdisplayitem = alert_kvpairs['$selected_rows.ITMDisplayItem']
 if len(summary) == 0:
     summary = itmdisplayitem
+
 node           = alert_kvpairs['$selected_rows.Node']
 alertkey       = alert_kvpairs['$selected_rows.AlertKey']
 nodealias      = alert_kvpairs['$selected_rows.NodeAlias']
@@ -89,7 +90,7 @@ print '<br>'
 
 print '<fieldset>'
 print '<legend>Summary</legend>'
-print '<input type="text" name="alert_summary" size="100" value="%s">' % summary
+print '<input type="text" name="alert_summary" size="100" value="%s" required>' % summary
 print '<br>'
 
 print '<br>'
